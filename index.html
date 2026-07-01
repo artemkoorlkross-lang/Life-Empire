@@ -1,0 +1,2384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111821" />
+  <meta name="description" content="Life Empire personal dashboard" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Life Empire" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Life Empire</title>
+  <style>
+    :root {
+      --bg: #070b10;
+      --bg-2: #0b1118;
+      --panel: rgba(17, 24, 33, 0.82);
+      --panel-2: rgba(21, 30, 41, 0.74);
+      --panel-3: rgba(26, 35, 48, 0.7);
+      --line: rgba(150, 170, 200, 0.12);
+      --line-strong: rgba(160, 180, 210, 0.22);
+      --text: #f5f7fb;
+      --muted: #9ba8b8;
+      --accent: #7890b5;
+      --accent-2: #a6b7d1;
+      --accent-rgb: 120, 144, 181;
+      --accent-2-rgb: 166, 183, 209;
+      --good: #8cc7ad;
+      --bad: #d98693;
+      --shadow: 0 22px 55px rgba(0, 0, 0, 0.36);
+      --shadow-hover: 0 28px 70px rgba(0, 0, 0, 0.42);
+      --inner: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+      --radius: 18px;
+      --radius-lg: 22px;
+      --speed: 180ms;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(88, 108, 136, 0.12), transparent 30%),
+        radial-gradient(circle at 86% 14%, rgba(70, 91, 118, 0.12), transparent 28%),
+        linear-gradient(135deg, #070b10 0%, #0b1118 52%, #080d13 100%);
+      overflow-x: hidden;
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body.accent-green {
+      --accent: #7fa894;
+      --accent-2: #a9c9b9;
+      --accent-rgb: 127, 168, 148;
+      --accent-2-rgb: 169, 201, 185;
+    }
+
+    body.accent-amber {
+      --accent: #b69a61;
+      --accent-2: #d7c28d;
+      --accent-rgb: 182, 154, 97;
+      --accent-2-rgb: 215, 194, 141;
+    }
+
+    body.accent-red {
+      --accent: #b47777;
+      --accent-2: #d2a1a1;
+      --accent-rgb: 180, 119, 119;
+      --accent-2-rgb: 210, 161, 161;
+    }
+
+    body.compact-mode {
+      --radius: 15px;
+      --radius-lg: 18px;
+    }
+
+    body.animations-off *,
+    body.animations-off *::before,
+    body.animations-off *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 1ms !important;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(170, 190, 220, 0.026) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(170, 190, 220, 0.026) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.58), transparent 78%);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      width: min(1340px, 100%);
+      margin: 0 auto;
+      padding: 22px 28px;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .sidebar,
+    .top-panel,
+    .card,
+    .stat-card,
+    .chat-panel {
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(145deg, rgba(26, 35, 48, 0.76), rgba(13, 20, 29, 0.82));
+      box-shadow: var(--shadow), var(--inner);
+      backdrop-filter: blur(18px) saturate(115%);
+      border-radius: var(--radius);
+      transition: transform 240ms var(--ease), border-color 240ms var(--ease), box-shadow 240ms var(--ease), background 240ms var(--ease);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 22px;
+      height: calc(100vh - 44px);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      color: #fff;
+      background: linear-gradient(145deg, rgba(116, 136, 166, 0.45), rgba(28, 38, 52, 0.84));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 28px rgba(0, 0, 0, 0.28);
+      font-weight: 900;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0;
+    }
+
+    .brand p,
+    .small {
+      color: var(--muted);
+      margin: 3px 0 0;
+      font-size: 0.82rem;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button,
+    .quick-actions button,
+    .icon-button,
+    .primary-button,
+    .ghost-button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      color: var(--text);
+      transition: transform 180ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease), box-shadow 220ms var(--ease);
+    }
+
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.035);
+      text-align: left;
+    }
+
+    .nav button:hover,
+    .nav button.active,
+    .quick-actions button:hover,
+    .primary-button:hover,
+    .ghost-button:hover,
+    .icon-button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(150, 170, 200, 0.28);
+      background: rgba(150, 170, 200, 0.08);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .nav button.active {
+      background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(255, 255, 255, 0.035));
+      border-color: rgba(150, 170, 200, 0.2);
+    }
+
+    .nav-icon {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent-2);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    main {
+      min-width: 0;
+      width: 100%;
+      max-width: 1040px;
+      justify-self: center;
+    }
+
+    .top-panel {
+      min-height: 112px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 22px;
+      padding: 24px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .top-title {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-icon {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--accent-2);
+      font-size: 1.1rem;
+      font-weight: 900;
+      box-shadow: var(--inner);
+    }
+
+    .top-panel::after,
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -18% -90% 42%;
+      height: 210px;
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.11), transparent 64%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--accent-2);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 2vw, 2.2rem);
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--muted);
+      white-space: nowrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mobile-settings-button {
+      display: none;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .section {
+      display: none;
+      animation: tabFade 260ms var(--ease) both;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes tabFade {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes lift {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover,
+    .stat-card:hover,
+    .chat-panel:hover,
+    .project-detail:hover {
+      transform: translateY(-3px);
+      border-color: rgba(150, 170, 200, 0.2);
+      box-shadow: var(--shadow-hover), var(--inner);
+    }
+
+    .hero-card {
+      grid-column: span 7;
+      min-height: 372px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(90deg, rgba(15, 22, 31, 0.98) 0%, rgba(17, 25, 35, 0.82) 48%, rgba(17, 25, 35, 0.42) 100%),
+        radial-gradient(circle at 76% 56%, rgba(159, 177, 204, 0.28), transparent 9%),
+        linear-gradient(160deg, #111821, #0d141d);
+    }
+
+    .hero-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 58%;
+      height: 72%;
+      opacity: 0.66;
+      background:
+        linear-gradient(142deg, transparent 0 34%, rgba(80, 96, 116, 0.24) 34.5% 44%, transparent 44.5%),
+        linear-gradient(154deg, transparent 0 44%, rgba(112, 130, 154, 0.26) 44.5% 54%, transparent 54.5%),
+        linear-gradient(18deg, transparent 0 45%, rgba(38, 52, 69, 0.82) 45.5% 58%, transparent 58.5%),
+        linear-gradient(170deg, transparent 0 56%, rgba(26, 38, 52, 0.9) 56.5% 72%, transparent 72.5%),
+        linear-gradient(to top, rgba(7, 11, 16, 0.96), transparent 70%);
+      clip-path: polygon(0 100%, 12% 74%, 25% 86%, 40% 52%, 54% 76%, 68% 38%, 84% 66%, 100% 20%, 100% 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-card h2 {
+      max-width: 520px;
+      font-size: clamp(2.85rem, 4.6vw, 4.1rem);
+      line-height: 0.95;
+    }
+
+    .hero-card p {
+      max-width: 560px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .level-card {
+      grid-column: span 5;
+      min-height: 372px;
+    }
+
+    .wide {
+      grid-column: span 8;
+    }
+
+    .side {
+      grid-column: span 4;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      min-height: 134px;
+      box-shadow: none;
+      background: linear-gradient(145deg, rgba(24, 33, 45, 0.8), rgba(15, 22, 31, 0.78));
+    }
+
+    .stat-value {
+      display: block;
+      margin-top: 10px;
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .progress {
+      width: 100%;
+      height: 10px;
+      margin: 14px 0 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.065);
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      box-shadow: none;
+      transform-origin: left center;
+      animation: xpPulse 520ms var(--ease) both;
+      transition: width 760ms var(--ease);
+    }
+
+    @keyframes xpPulse {
+      0% {
+        opacity: 0.72;
+        transform: scaleX(0.96);
+      }
+      100% {
+        opacity: 1;
+        transform: scaleX(1);
+      }
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .quick-actions button {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 14px;
+      min-height: 84px;
+      padding: 16px 18px;
+      text-align: left;
+    }
+
+    .action-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(190, 205, 228, 0.2);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--accent-2);
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    .action-title {
+      display: block;
+      font-weight: 850;
+      color: var(--text);
+    }
+
+    .action-copy {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .quick-actions button,
+    .primary-button {
+      background: linear-gradient(145deg, rgba(31, 42, 56, 0.92), rgba(20, 29, 40, 0.9));
+      border-color: rgba(176, 194, 222, 0.18);
+      font-weight: 800;
+    }
+
+    .ghost-button,
+    .icon-button {
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .form {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .form.two {
+      grid-template-columns: 1fr 1fr auto;
+    }
+
+    .form.three {
+      grid-template-columns: 1fr 1fr 1fr auto;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: rgba(8, 13, 19, 0.42);
+      color: var(--text);
+      padding: 11px 12px;
+      outline: none;
+      transition: border-color var(--speed), box-shadow var(--speed);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(166, 183, 209, 0.48);
+      box-shadow: 0 0 0 4px rgba(120, 144, 181, 0.1);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(220, 228, 240, 0.48);
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 56px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.035);
+      animation: pop 220ms ease both;
+      transition: transform 220ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease), opacity 220ms var(--ease);
+    }
+
+    .item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(150, 170, 200, 0.18);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .check {
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(166, 183, 209, 0.34);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--good);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .item.done {
+      opacity: 0.62;
+      animation: taskComplete 360ms var(--ease) both;
+      border-color: rgba(140, 199, 173, 0.2);
+    }
+
+    .item.done .item-title {
+      text-decoration: line-through;
+    }
+
+    .item-title {
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .item-meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 3px;
+      overflow-wrap: anywhere;
+    }
+
+    .icon-button {
+      width: 40px;
+      min-height: 40px;
+      color: var(--text);
+    }
+
+    .money-total {
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      font-weight: 950;
+      margin: 12px 0;
+    }
+
+    .quick-actions button:hover,
+    .primary-button:hover {
+      background: linear-gradient(145deg, rgba(var(--accent-rgb), 0.68), rgba(44, 58, 76, 0.88));
+    }
+
+    .quick-actions button:active,
+    .primary-button:active,
+    .ghost-button:active,
+    .icon-button:active,
+    .nav button:active,
+    .project-tab:active {
+      transform: translateY(0) scale(0.985);
+      transition-duration: 90ms;
+    }
+
+    .positive {
+      color: var(--good);
+    }
+
+    .negative {
+      color: var(--bad);
+    }
+
+    .project-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .project-detail {
+      min-height: 360px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.035);
+      transition: transform 240ms var(--ease), border-color 240ms var(--ease), box-shadow 240ms var(--ease), background 240ms var(--ease);
+    }
+
+    .project-list {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .project-tab {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      min-height: 58px;
+      padding: 12px;
+      text-align: left;
+      transition: transform 180ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease);
+    }
+
+    .project-tab.active {
+      border-color: rgba(166, 183, 209, 0.34);
+      background: rgba(var(--accent-rgb), 0.11);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      color: var(--muted);
+      padding: 5px 9px;
+      font-size: 0.76rem;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .settings-card {
+      min-height: 230px;
+    }
+
+    .setting-row {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .segmented button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      transition: transform 180ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease);
+    }
+
+    .segmented button.active {
+      border-color: rgba(var(--accent-2-rgb), 0.4);
+      background: rgba(var(--accent-rgb), 0.16);
+    }
+
+    .avatar-preview {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      margin: 12px 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(var(--accent-rgb), 0.2), rgba(255, 255, 255, 0.045));
+      color: var(--text);
+      font-weight: 900;
+      font-size: 1.2rem;
+    }
+
+    .toggle-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 54px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .switch {
+      position: relative;
+      width: 52px;
+      height: 30px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .switch span {
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      transition: background 180ms var(--ease), border-color 180ms var(--ease);
+    }
+
+    .switch span::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      top: 3px;
+      left: 3px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: transform 180ms var(--ease), background 180ms var(--ease);
+    }
+
+    .switch input:checked + span {
+      border-color: rgba(var(--accent-2-rgb), 0.42);
+      background: rgba(var(--accent-rgb), 0.22);
+    }
+
+    .switch input:checked + span::after {
+      transform: translateX(22px);
+      background: var(--accent-2);
+    }
+
+    body.compact-mode .app-shell {
+      gap: 14px;
+      padding-top: 16px;
+    }
+
+    body.compact-mode .card,
+    body.compact-mode .top-panel {
+      padding: 18px;
+    }
+
+    body.compact-mode .grid,
+    body.compact-mode .settings-grid {
+      gap: 14px;
+    }
+
+    .chat-panel {
+      height: min(660px, calc(100vh - 160px));
+      min-height: 520px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    .chat-header,
+    .chat-input {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .chat-input {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .messages {
+      padding: 18px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bubble {
+      max-width: min(620px, 88%);
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      line-height: 1.5;
+      animation: lift 220ms var(--ease) both;
+    }
+
+    @keyframes taskComplete {
+      0% {
+        transform: scale(1);
+      }
+      45% {
+        transform: scale(1.012);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .bubble.assistant {
+      align-self: flex-start;
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid rgba(150, 170, 200, 0.18);
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: rgba(52, 66, 87, 0.68);
+      border: 1px solid rgba(166, 183, 209, 0.2);
+    }
+
+    .mobile-bar {
+      display: none;
+    }
+
+    .update-toast {
+      position: fixed;
+      z-index: 40;
+      right: 22px;
+      bottom: 22px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      max-width: min(420px, calc(100vw - 28px));
+      padding: 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: rgba(11, 17, 24, 0.94);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      animation: lift 220ms var(--ease) both;
+    }
+
+    .update-toast.show {
+      display: flex;
+    }
+
+    .update-toast p {
+      margin: 0;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .update-toast button {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid rgba(var(--accent-2-rgb), 0.24);
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(var(--accent-rgb), 0.34), rgba(31, 42, 56, 0.92));
+      color: var(--text);
+      font-weight: 850;
+      transition: transform 180ms var(--ease), background 220ms var(--ease);
+    }
+
+    .update-toast button:active {
+      transform: scale(0.98);
+    }
+
+    @media (max-width: 980px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+        padding: 14px;
+        padding-bottom: calc(104px + env(safe-area-inset-bottom));
+      }
+
+      main {
+        max-width: 760px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-bar {
+        position: fixed;
+        z-index: 20;
+        left: 14px;
+        right: 14px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        padding: 8px;
+        border: 1px solid rgba(150, 170, 200, 0.16);
+        border-radius: 24px;
+        background: rgba(9, 14, 21, 0.92);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42), var(--inner);
+        backdrop-filter: blur(22px) saturate(130%);
+      }
+
+      .mobile-bar button {
+        min-height: 56px;
+        border: 0;
+        border-radius: 18px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 0.66rem;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+        gap: 3px;
+        transition: transform 160ms var(--ease), background 180ms var(--ease), color 180ms var(--ease);
+      }
+
+      .mobile-bar button span:first-child {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        font-size: 0.78rem;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .mobile-bar button.active {
+        color: var(--text);
+        background: rgba(var(--accent-rgb), 0.16);
+        border: 1px solid rgba(150, 170, 200, 0.18);
+      }
+
+      .mobile-bar button.active span:first-child {
+        background: rgba(var(--accent-rgb), 0.24);
+        color: var(--accent-2);
+      }
+
+      .update-toast {
+        left: 10px;
+        right: 10px;
+        bottom: calc(88px + env(safe-area-inset-bottom));
+        justify-content: space-between;
+      }
+
+      .top-panel {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .mobile-settings-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hero-card,
+      .level-card,
+      .wide,
+      .side {
+        grid-column: 1 / -1;
+      }
+
+      .project-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      main {
+        max-width: 430px;
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .form.two,
+      .form.three,
+      .chat-input {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        min-height: 0;
+        gap: 22px;
+      }
+
+      .top-panel,
+      .card {
+        padding: 16px;
+      }
+
+      .top-panel {
+        min-height: 0;
+        margin-bottom: 12px;
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+
+      .top-panel::after {
+        display: none;
+      }
+
+      .top-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        justify-content: flex-end;
+      }
+
+      .pill,
+      .mobile-settings-button {
+        min-height: 34px;
+        font-size: 0.78rem;
+        background: rgba(255, 255, 255, 0.055);
+      }
+
+      .app-shell {
+        padding: 12px;
+        padding-bottom: calc(112px + env(safe-area-inset-bottom));
+      }
+
+      .top-title {
+        align-items: flex-start;
+        gap: 12px;
+        padding-right: 116px;
+      }
+
+      .header-icon {
+        display: none;
+      }
+
+      .top-title h2,
+      #screenTitle {
+        font-size: clamp(1.8rem, 8vw, 2.35rem);
+        line-height: 1;
+      }
+
+      .top-title .small {
+        max-width: 310px;
+        margin-top: 8px;
+        line-height: 1.35;
+      }
+
+      .hero-card h2 {
+        max-width: 310px;
+        font-size: clamp(2.25rem, 10.5vw, 3rem);
+        line-height: 0.98;
+      }
+
+      .hero-card p {
+        max-width: 300px;
+        line-height: 1.45;
+      }
+
+      .hero-card::before {
+        width: 74%;
+        height: 62%;
+        opacity: 0.38;
+      }
+
+      #focusForm {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      #focusForm input,
+      #focusForm button,
+      input,
+      select,
+      textarea,
+      .primary-button {
+        min-height: 48px;
+      }
+
+      #focusForm button {
+        width: 100%;
+      }
+
+      .stats-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .stat-card {
+        min-height: 82px;
+        padding: 12px 10px;
+      }
+
+      .stat-card .small {
+        font-size: 0.7rem;
+      }
+
+      .stat-value {
+        margin-top: 8px;
+        font-size: 1.45rem;
+      }
+
+      .level-card {
+        min-height: 0;
+      }
+
+      .quick-actions button {
+        min-height: 86px;
+        grid-template-columns: auto 1fr auto;
+        gap: 8px;
+        padding: 14px;
+      }
+
+      .quick-actions button::after {
+        content: ">";
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      .action-icon {
+        width: 38px;
+        height: 38px;
+        grid-row: span 2;
+      }
+
+      .action-copy {
+        display: none;
+      }
+
+      .segmented {
+        grid-template-columns: 1fr;
+      }
+
+      .item {
+        grid-template-columns: auto 1fr auto;
+      }
+
+      .chat-panel {
+        height: calc(100vh - 190px);
+        min-height: 460px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .mobile-bar {
+        left: 12px;
+        right: 12px;
+        bottom: calc(8px + env(safe-area-inset-bottom));
+        gap: 4px;
+        padding: 7px;
+      }
+
+      .mobile-bar button {
+        min-height: 54px;
+        font-size: 0.62rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <div class="brand-mark">LE</div>
+        <div>
+          <h1>Life Empire</h1>
+          <p>Command your day</p>
+        </div>
+      </div>
+
+      <nav class="nav" id="desktopNav"></nav>
+
+      <div class="sidebar-footer">
+        <p class="eyebrow">System Status</p>
+        <h3 id="sidebarLevel">Level 1</h3>
+        <div class="progress"><span id="sidebarXpBar"></span></div>
+        <p class="small" id="sidebarXpText">0 / 100 XP</p>
+      </div>
+    </aside>
+
+    <main>
+      <header class="top-panel">
+        <div class="top-title">
+          <div class="header-icon">DB</div>
+          <div>
+            <p class="eyebrow" id="todayLabel">Today</p>
+            <h2 id="screenTitle">Dashboard</h2>
+            <p class="small">A cockpit for tasks, fitness, money, projects, and momentum.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <div class="pill" id="streakPill">Streak: 0 days</div>
+          <button class="mobile-settings-button" type="button" data-section="settings" aria-label="Settings">S</button>
+        </div>
+      </header>
+
+      <section class="section active" id="dashboard" aria-labelledby="dashboard-heading">
+        <div class="grid">
+          <article class="card hero-card">
+            <div>
+              <p class="eyebrow">Welcome Back</p>
+              <h2 id="greeting">Build your empire.</h2>
+              <p>Pick one strong focus, stack a few wins, and let the XP meter prove that the day is moving.</p>
+            </div>
+            <div>
+              <label class="small" for="focusInput">Today's focus</label>
+              <form class="form two" id="focusForm">
+                <input id="focusInput" type="text" placeholder="Example: Ship the first Drop Empire screen" autocomplete="off" />
+                <button class="primary-button" type="submit">Lock Focus</button>
+              </form>
+            </div>
+          </article>
+
+          <article class="card level-card">
+            <p class="eyebrow">Player Profile</p>
+            <h2 id="levelLabel">Level 1</h2>
+            <div class="progress"><span id="xpBar"></span></div>
+            <p class="small" id="xpText">0 / 100 XP</p>
+            <div class="stats-row">
+              <div class="stat-card">
+                <span class="small">Streak</span>
+                <span class="stat-value" id="streakCount">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="small">Tasks Done</span>
+                <span class="stat-value" id="tasksDoneCount">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="small">Balance</span>
+                <span class="stat-value" id="miniBalance">$0</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card full">
+            <p class="eyebrow">Quick Actions</p>
+            <div class="quick-actions">
+              <button data-jump="tasks">
+                <span class="action-icon">TK</span>
+                <span><span class="action-title">Add Task</span><span class="action-copy">Create a new task</span></span>
+              </button>
+              <button data-jump="fitness">
+                <span class="action-icon">FT</span>
+                <span><span class="action-title">Log Fitness</span><span class="action-copy">Track your workout</span></span>
+              </button>
+              <button data-jump="money">
+                <span class="action-icon">$</span>
+                <span><span class="action-title">Money Move</span><span class="action-copy">Record income or expense</span></span>
+              </button>
+              <button data-jump="assistant">
+                <span class="action-icon">AI</span>
+                <span><span class="action-title">Ask AI</span><span class="action-copy">Get guidance and ideas</span></span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="tasks" aria-labelledby="tasks-heading">
+        <div class="grid">
+          <article class="card wide">
+            <p class="eyebrow">Mission Queue</p>
+            <h2 id="tasks-heading">Tasks</h2>
+            <form class="form two" id="taskForm">
+              <input id="taskInput" type="text" placeholder="Add a mission..." autocomplete="off" />
+              <button class="primary-button" type="submit">Add Task</button>
+            </form>
+            <div class="list" id="taskList"></div>
+          </article>
+          <aside class="card side">
+            <p class="eyebrow">Reward Rules</p>
+            <h3>Complete tasks to gain XP</h3>
+            <p class="small">Every completed task gives 20 XP. Your streak grows when you complete at least one task today.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="fitness" aria-labelledby="fitness-heading">
+        <div class="grid">
+          <article class="card full">
+            <p class="eyebrow">Body Stats</p>
+            <h2 id="fitness-heading">Fitness</h2>
+            <form class="form three" id="fitnessForm">
+              <input id="weightInput" type="number" step="0.1" placeholder="Weight" />
+              <input id="stepsInput" type="number" placeholder="Steps" />
+              <input id="workoutInput" type="text" placeholder="Workout note" autocomplete="off" />
+              <button class="primary-button" type="submit">Save Log</button>
+            </form>
+          </article>
+          <article class="card side">
+            <span class="small">Latest Weight</span>
+            <div class="money-total" id="latestWeight">--</div>
+          </article>
+          <article class="card side">
+            <span class="small">Latest Steps</span>
+            <div class="money-total" id="latestSteps">0</div>
+          </article>
+          <article class="card side">
+            <span class="small">Workout Logs</span>
+            <div class="money-total" id="workoutCount">0</div>
+          </article>
+          <article class="card full">
+            <h3>Recent Fitness Entries</h3>
+            <div class="list" id="fitnessList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="money" aria-labelledby="money-heading">
+        <div class="grid">
+          <article class="card wide">
+            <p class="eyebrow">Treasury</p>
+            <h2 id="money-heading">Money</h2>
+            <div class="money-total" id="balance">$0</div>
+            <form class="form three" id="moneyForm">
+              <select id="moneyType" aria-label="Transaction type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+              <input id="moneyAmount" type="number" step="0.01" placeholder="Amount" />
+              <input id="moneyNote" type="text" placeholder="Note" autocomplete="off" />
+              <button class="primary-button" type="submit">Add</button>
+            </form>
+            <div class="list" id="moneyList"></div>
+          </article>
+          <aside class="card side">
+            <p class="eyebrow">Saving Goal</p>
+            <form class="form" id="goalForm">
+              <input id="goalName" type="text" placeholder="Goal name" autocomplete="off" />
+              <input id="goalAmount" type="number" step="0.01" placeholder="Goal amount" />
+              <button class="primary-button" type="submit">Set Goal</button>
+            </form>
+            <div class="progress"><span id="goalBar"></span></div>
+            <p class="small" id="goalText">No goal set yet.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="projects" aria-labelledby="projects-heading">
+        <div class="grid">
+          <article class="card full">
+            <p class="eyebrow">Build Lab</p>
+            <h2 id="projects-heading">Projects</h2>
+            <form class="form two" id="projectForm">
+              <input id="projectInput" type="text" placeholder="New project name" autocomplete="off" />
+              <button class="primary-button" type="submit">Add Project</button>
+            </form>
+            <div class="project-layout">
+              <div class="project-list" id="projectList"></div>
+              <div class="project-detail" id="projectDetail"></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="assistant" aria-labelledby="assistant-heading">
+        <div class="chat-panel">
+          <div class="chat-header">
+            <p class="eyebrow">AI Companion</p>
+            <h2 id="assistant-heading">Assistant</h2>
+            <p class="small">Frontend demo mode. Replies are simulated for now.</p>
+          </div>
+          <div class="messages" id="messages"></div>
+          <form class="chat-input" id="chatForm">
+            <input id="chatInput" type="text" placeholder="Ask about your empire..." autocomplete="off" />
+            <button class="primary-button" type="submit">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="section" id="settings" aria-labelledby="settings-heading">
+        <div class="grid">
+          <article class="card full">
+            <p class="eyebrow" id="settingsEyebrow">Control Room</p>
+            <h2 id="settings-heading">Settings</h2>
+            <p class="small" id="settingsIntro">Tune language, profile, accent color, and app behavior.</p>
+
+            <div class="settings-grid">
+              <section class="card settings-card">
+                <p class="eyebrow" id="languageLabel">Language</p>
+                <h3 id="languageTitle">Choose language</h3>
+                <div class="segmented" id="languageOptions">
+                  <button type="button" data-language="en">English</button>
+                  <button type="button" data-language="ru">Русский</button>
+                  <button type="button" data-language="pl">Polski</button>
+                  <button type="button" data-language="uk">Українська</button>
+                </div>
+              </section>
+
+              <section class="card settings-card">
+                <p class="eyebrow" id="themeLabel">Theme</p>
+                <h3 id="themeTitle">Accent color</h3>
+                <p class="small" id="themeCopy">The dark gray theme stays on. Choose a subtle accent.</p>
+                <div class="segmented" id="accentOptions">
+                  <button type="button" data-accent="blue">Blue-gray</button>
+                  <button type="button" data-accent="green">Green</button>
+                  <button type="button" data-accent="amber">Amber</button>
+                  <button type="button" data-accent="red">Red</button>
+                </div>
+              </section>
+
+              <section class="card settings-card">
+                <p class="eyebrow" id="profileLabel">Profile</p>
+                <h3 id="profileTitle">Nickname</h3>
+                <div class="avatar-preview" id="avatarPreview">LE</div>
+                <form class="form" id="profileForm">
+                  <input id="nicknameInput" type="text" placeholder="Your nickname" autocomplete="off" />
+                  <button class="primary-button" type="submit" id="saveProfileButton">Save Profile</button>
+                </form>
+              </section>
+
+              <section class="card settings-card">
+                <p class="eyebrow" id="preferencesLabel">App Preferences</p>
+                <h3 id="preferencesTitle">Interface</h3>
+                <div class="toggle-list">
+                  <label class="toggle-row" data-toggle-setting="compactMode">
+                    <span>
+                      <strong id="compactModeLabel">Compact mode</strong>
+                      <span class="small" id="compactModeCopy">Reduce spacing across the app.</span>
+                    </span>
+                    <span class="switch">
+                      <input id="compactToggle" type="checkbox" />
+                      <span aria-hidden="true"></span>
+                    </span>
+                  </label>
+                  <label class="toggle-row" data-toggle-setting="animations">
+                    <span>
+                      <strong id="animationsLabel">Animations</strong>
+                      <span class="small" id="animationsCopy">Use calm hover and transition effects.</span>
+                    </span>
+                    <span class="switch">
+                      <input id="animationsToggle" type="checkbox" />
+                      <span aria-hidden="true"></span>
+                    </span>
+                  </label>
+                </div>
+              </section>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-bar" id="mobileNav" aria-label="Mobile navigation"></nav>
+
+  <div class="update-toast" id="updateToast" role="status" aria-live="polite">
+    <p id="updateToastText">Update available</p>
+    <button type="button" id="updateButton">Update</button>
+  </div>
+
+  <script>
+    const storageKey = "lifeEmpireState.v1";
+    const xpPerLevel = 100;
+    const taskXp = 20;
+
+    const navItems = [
+      { id: "dashboard", labelKey: "navDashboard", shortKey: "shortDashboard", icon: "D" },
+      { id: "tasks", labelKey: "navTasks", shortKey: "shortTasks", icon: "T" },
+      { id: "fitness", labelKey: "navFitness", shortKey: "shortFitness", icon: "F" },
+      { id: "money", labelKey: "navMoney", shortKey: "shortMoney", icon: "$" },
+      { id: "projects", labelKey: "navProjects", shortKey: "shortProjects", icon: "P" },
+      { id: "assistant", labelKey: "navAssistant", shortKey: "shortAssistant", icon: "AI" },
+      { id: "settings", labelKey: "navSettings", shortKey: "shortSettings", icon: "S" }
+    ];
+
+    const translations = {
+      en: {
+        navDashboard: "Dashboard", navTasks: "Tasks", navFitness: "Fitness", navMoney: "Money", navProjects: "Projects", navAssistant: "AI Assistant", navSettings: "Settings",
+        shortDashboard: "Home", shortTasks: "Tasks", shortFitness: "Fit", shortMoney: "Cash", shortProjects: "Build", shortAssistant: "AI", shortSettings: "Set",
+        commandYourDay: "Command your day", systemStatus: "System Status", dashboardSubtitle: "A cockpit for tasks, fitness, money, projects, and momentum.",
+        streak: "Streak", day: "day", days: "days", level: "Level", xp: "XP", welcomeBack: "Welcome Back", morningGreeting: "Morning mission online.", afternoonGreeting: "Afternoon power mode.", nightGreeting: "Night ops activated.",
+        dashboardMotivation: "Pick one strong focus, stack a few wins, and let the XP meter prove that the day is moving.", todaysFocus: "Today's focus", focusPlaceholder: "Example: Ship the first Drop Empire screen", lockFocus: "Lock Focus",
+        playerProfile: "Player Profile", tasksDone: "Tasks Done", balance: "Balance", quickActions: "Quick Actions", addTask: "Add Task", addTaskCopy: "Create a new task", logFitness: "Log Fitness", logFitnessCopy: "Track your workout", moneyMove: "Money Move", moneyMoveCopy: "Record income or expense", askAi: "Ask AI", askAiCopy: "Get guidance and ideas",
+        missionQueue: "Mission Queue", addMissionPlaceholder: "Add a mission...", rewardRules: "Reward Rules", completeTasksXp: "Complete tasks to gain XP", rewardCopy: "Every completed task gives 20 XP. Your streak grows when you complete at least one task today.", noTasks: "No missions yet. Add one and start the XP engine.", worthXp: "Worth", completed: "Completed", completeTask: "Complete task", deleteTask: "Delete task",
+        bodyStats: "Body Stats", weight: "Weight", steps: "Steps", workoutNote: "Workout note", saveLog: "Save Log", latestWeight: "Latest Weight", latestSteps: "Latest Steps", workoutLogs: "Workout Logs", recentFitness: "Recent Fitness Entries", noFitness: "No body stats logged yet.", fitnessLog: "Fitness log", deleteFitness: "Delete fitness entry",
+        treasury: "Treasury", income: "Income", expense: "Expense", amount: "Amount", note: "Note", add: "Add", savingGoal: "Saving Goal", goalName: "Goal name", goalAmount: "Goal amount", setGoal: "Set Goal", noGoal: "No goal set yet.", noMoney: "No transactions yet.", deleteMoney: "Delete money entry",
+        buildLab: "Build Lab", newProjectName: "New project name", addProject: "Add Project", entries: "entries", addProjectBegin: "Add a project to begin.", activeProject: "Active Project", projectEntryPlaceholder: "Add task, bug, or idea", addEntry: "Add Entry", task: "Task", bug: "Bug", idea: "Idea", bugs: "Bugs", ideas: "Ideas", noProjectEntries: "No project entries yet.", deleteProjectEntry: "Delete project entry",
+        aiCompanion: "AI Companion", assistantHeading: "Assistant", assistantDemo: "Frontend demo mode. Replies are simulated for now.", chatPlaceholder: "Ask about your empire...", send: "Send",
+        settingsEyebrow: "Control Room", settingsIntro: "Tune language, profile, accent color, and app behavior.", language: "Language", chooseLanguage: "Choose language", theme: "Theme", accentColor: "Accent color", themeCopy: "The dark gray theme stays on. Choose a subtle accent.", accentBlue: "Blue-gray", accentGreen: "Green", accentAmber: "Amber", accentRed: "Red", profile: "Profile", nickname: "Nickname", nicknamePlaceholder: "Your nickname", saveProfile: "Save Profile", appPreferences: "App Preferences", interface: "Interface", compactMode: "Compact mode", compactModeCopy: "Reduce spacing across the app.", animations: "Animations", animationsCopy: "Use calm hover and transition effects.",
+        aiTaskReply: "I would pick the smallest task that creates visible momentum, complete it, then chain one harder mission after it.", aiMoneyReply: "Treasury readout: log the next expense, protect the saving goal, and look for one low-friction income move this week.", aiFitnessReply: "Fitness mode: steps, hydration, and one focused workout note. Keep it simple enough that tomorrow-you can repeat it.", aiProjectReply: "Project command: define the next shippable slice, write one bug or risk, then turn one idea into a task.", aiDefaultReply: "Empire signal received. Choose one priority, give it a clear finish line, and I will help you turn it into a clean next action.", aiOffline: "AI requires internet connection.", updateAvailable: "Update available", updateNow: "Update"
+      },
+      ru: {
+        navDashboard: "Панель", navTasks: "Задачи", navFitness: "Фитнес", navMoney: "Деньги", navProjects: "Проекты", navAssistant: "AI Ассистент", navSettings: "Настройки",
+        shortDashboard: "Домой", shortTasks: "Задачи", shortFitness: "Фит", shortMoney: "Кэш", shortProjects: "Сборка", shortAssistant: "AI", shortSettings: "Настр",
+        commandYourDay: "Управляй днем", systemStatus: "Статус системы", dashboardSubtitle: "Центр управления задачами, фитнесом, деньгами, проектами и темпом.",
+        streak: "Серия", day: "день", days: "дней", level: "Уровень", xp: "XP", welcomeBack: "С возвращением", morningGreeting: "Утренний режим включен.", afternoonGreeting: "Дневной режим силы.", nightGreeting: "Ночной режим включен.",
+        dashboardMotivation: "Выбери один сильный фокус, собери несколько побед и дай XP показать движение дня.", todaysFocus: "Фокус дня", focusPlaceholder: "Например: сделать первый экран Drop Empire", lockFocus: "Зафиксировать",
+        playerProfile: "Профиль игрока", tasksDone: "Задач закрыто", balance: "Баланс", quickActions: "Быстрые действия", addTask: "Добавить задачу", addTaskCopy: "Создать новую задачу", logFitness: "Записать фитнес", logFitnessCopy: "Отследить тренировку", moneyMove: "Деньги", moneyMoveCopy: "Доход или расход", askAi: "Спросить AI", askAiCopy: "Идеи и помощь",
+        missionQueue: "Очередь миссий", addMissionPlaceholder: "Добавить миссию...", rewardRules: "Правила награды", completeTasksXp: "Закрывай задачи и получай XP", rewardCopy: "Каждая закрытая задача дает 20 XP. Серия растет, когда сегодня закрыта хотя бы одна задача.", noTasks: "Миссий пока нет. Добавь одну и запусти XP.", worthXp: "Стоит", completed: "Готово", completeTask: "Завершить задачу", deleteTask: "Удалить задачу",
+        bodyStats: "Показатели тела", weight: "Вес", steps: "Шаги", workoutNote: "Заметка о тренировке", saveLog: "Сохранить", latestWeight: "Последний вес", latestSteps: "Последние шаги", workoutLogs: "Тренировки", recentFitness: "Последние записи фитнеса", noFitness: "Записей фитнеса пока нет.", fitnessLog: "Запись фитнеса", deleteFitness: "Удалить запись фитнеса",
+        treasury: "Казна", income: "Доход", expense: "Расход", amount: "Сумма", note: "Заметка", add: "Добавить", savingGoal: "Цель накоплений", goalName: "Название цели", goalAmount: "Сумма цели", setGoal: "Задать цель", noGoal: "Цель пока не задана.", noMoney: "Транзакций пока нет.", deleteMoney: "Удалить запись денег",
+        buildLab: "Лаборатория", newProjectName: "Название нового проекта", addProject: "Добавить проект", entries: "записей", addProjectBegin: "Добавь проект, чтобы начать.", activeProject: "Активный проект", projectEntryPlaceholder: "Добавить задачу, баг или идею", addEntry: "Добавить", task: "Задача", bug: "Баг", idea: "Идея", bugs: "Баги", ideas: "Идеи", noProjectEntries: "Записей проекта пока нет.", deleteProjectEntry: "Удалить запись проекта",
+        aiCompanion: "AI Компаньон", assistantHeading: "Ассистент", assistantDemo: "Демо интерфейса. Ответы пока симулируются.", chatPlaceholder: "Спроси про свою империю...", send: "Отправить",
+        settingsEyebrow: "Пульт управления", settingsIntro: "Настрой язык, профиль, акцент и поведение приложения.", language: "Язык", chooseLanguage: "Выбери язык", theme: "Тема", accentColor: "Акцент", themeCopy: "Темная серая тема остается. Выбери мягкий акцент.", accentBlue: "Сине-серый", accentGreen: "Зеленый", accentAmber: "Янтарный", accentRed: "Красный", profile: "Профиль", nickname: "Никнейм", nicknamePlaceholder: "Твой никнейм", saveProfile: "Сохранить профиль", appPreferences: "Настройки приложения", interface: "Интерфейс", compactMode: "Компактный режим", compactModeCopy: "Уменьшить отступы в приложении.", animations: "Анимации", animationsCopy: "Использовать спокойные эффекты.", 
+        aiTaskReply: "Я бы выбрал самую маленькую задачу с видимым результатом, закрыл ее и затем взял миссию сложнее.", aiMoneyReply: "Казна: запиши следующий расход, защити цель накоплений и найди один простой денежный шаг на неделю.", aiFitnessReply: "Фитнес-режим: шаги, вода и одна четкая заметка о тренировке. Пусть это будет легко повторить завтра.", aiProjectReply: "Проект: определи ближайший кусок для релиза, запиши один риск и преврати одну идею в задачу.", aiDefaultReply: "Сигнал принят. Выбери один приоритет, дай ему четкий финиш и я помогу оформить следующий шаг.", aiOffline: "AI требует подключения к интернету.", updateAvailable: "Доступно обновление", updateNow: "Обновить"
+      },
+      pl: {
+        navDashboard: "Panel", navTasks: "Zadania", navFitness: "Fitness", navMoney: "Finanse", navProjects: "Projekty", navAssistant: "Asystent AI", navSettings: "Ustawienia",
+        shortDashboard: "Start", shortTasks: "Zadania", shortFitness: "Fit", shortMoney: "Kasa", shortProjects: "Build", shortAssistant: "AI", shortSettings: "Ust.",
+        commandYourDay: "Dowódź swoim dniem", systemStatus: "Status systemu", dashboardSubtitle: "Kokpit dla zadań, fitnessu, pieniędzy, projektów i tempa.",
+        streak: "Seria", day: "dzień", days: "dni", level: "Poziom", xp: "XP", welcomeBack: "Witaj z powrotem", morningGreeting: "Poranna misja online.", afternoonGreeting: "Popołudniowy tryb mocy.", nightGreeting: "Nocne działania aktywne.",
+        dashboardMotivation: "Wybierz jeden mocny fokus, zbuduj kilka wygranych i pozwól paskowi XP pokazać postęp dnia.", todaysFocus: "Dzisiejszy fokus", focusPlaceholder: "Przykład: zbuduj pierwszy ekran Drop Empire", lockFocus: "Zablokuj Fokus",
+        playerProfile: "Profil gracza", tasksDone: "Zrobione zadania", balance: "Saldo", quickActions: "Szybkie akcje", addTask: "Dodaj zadanie", addTaskCopy: "Utwórz nowe zadanie", logFitness: "Dodaj fitness", logFitnessCopy: "Śledź trening", moneyMove: "Ruch finansowy", moneyMoveCopy: "Dodaj przychód lub wydatek", askAi: "Zapytaj AI", askAiCopy: "Pomoc i pomysły",
+        missionQueue: "Kolejka misji", addMissionPlaceholder: "Dodaj misję...", rewardRules: "Zasady nagród", completeTasksXp: "Kończ zadania i zdobywaj XP", rewardCopy: "Każde ukończone zadanie daje 20 XP. Seria rośnie, gdy ukończysz dziś co najmniej jedno zadanie.", noTasks: "Brak misji. Dodaj jedną i uruchom XP.", worthXp: "Warte", completed: "Ukończone", completeTask: "Ukończ zadanie", deleteTask: "Usuń zadanie",
+        bodyStats: "Statystyki ciała", weight: "Waga", steps: "Kroki", workoutNote: "Notatka treningowa", saveLog: "Zapisz", latestWeight: "Ostatnia waga", latestSteps: "Ostatnie kroki", workoutLogs: "Treningi", recentFitness: "Ostatnie wpisy fitness", noFitness: "Brak wpisów fitness.", fitnessLog: "Wpis fitness", deleteFitness: "Usuń wpis fitness",
+        treasury: "Skarbiec", income: "Przychód", expense: "Wydatek", amount: "Kwota", note: "Notatka", add: "Dodaj", savingGoal: "Cel oszczędności", goalName: "Nazwa celu", goalAmount: "Kwota celu", setGoal: "Ustaw cel", noGoal: "Brak ustawionego celu.", noMoney: "Brak transakcji.", deleteMoney: "Usuń wpis finansowy",
+        buildLab: "Laboratorium", newProjectName: "Nazwa nowego projektu", addProject: "Dodaj projekt", entries: "wpisów", addProjectBegin: "Dodaj projekt, aby zacząć.", activeProject: "Aktywny projekt", projectEntryPlaceholder: "Dodaj zadanie, błąd lub pomysł", addEntry: "Dodaj wpis", task: "Zadanie", bug: "Błąd", idea: "Pomysł", bugs: "Błędy", ideas: "Pomysły", noProjectEntries: "Brak wpisów projektu.", deleteProjectEntry: "Usuń wpis projektu",
+        aiCompanion: "Towarzysz AI", assistantHeading: "Asystent", assistantDemo: "Tryb demo frontend. Odpowiedzi są na razie symulowane.", chatPlaceholder: "Zapytaj o swoje imperium...", send: "Wyślij",
+        settingsEyebrow: "Centrum kontroli", settingsIntro: "Dostosuj język, profil, akcent i zachowanie aplikacji.", language: "Język", chooseLanguage: "Wybierz język", theme: "Motyw", accentColor: "Kolor akcentu", themeCopy: "Ciemnoszary motyw zostaje. Wybierz subtelny akcent.", accentBlue: "Niebiesko-szary", accentGreen: "Zielony", accentAmber: "Bursztynowy", accentRed: "Czerwony", profile: "Profil", nickname: "Pseudonim", nicknamePlaceholder: "Twój pseudonim", saveProfile: "Zapisz profil", appPreferences: "Preferencje aplikacji", interface: "Interfejs", compactMode: "Tryb kompaktowy", compactModeCopy: "Zmniejsz odstępy w aplikacji.", animations: "Animacje", animationsCopy: "Używaj spokojnych efektów.",
+        aiTaskReply: "Wybrałbym najmniejsze zadanie z widocznym efektem, ukończył je, a potem dołożył jedną trudniejszą misję.", aiMoneyReply: "Skarbiec: zapisz kolejny wydatek, chroń cel oszczędności i znajdź jeden prosty ruch finansowy na ten tydzień.", aiFitnessReply: "Tryb fitness: kroki, nawodnienie i jedna konkretna notatka treningowa. Niech będzie łatwe do powtórzenia jutro.", aiProjectReply: "Projekt: określ najbliższy fragment do wypuszczenia, zapisz jeden błąd lub ryzyko i zmień jeden pomysł w zadanie.", aiDefaultReply: "Sygnał przyjęty. Wybierz jeden priorytet, nadaj mu jasny finisz, a pomogę ułożyć następny krok.", aiOffline: "AI wymaga połączenia z internetem.", updateAvailable: "Dostępna aktualizacja", updateNow: "Aktualizuj"
+      },
+      uk: {
+        navDashboard: "Панель", navTasks: "Завдання", navFitness: "Фітнес", navMoney: "Гроші", navProjects: "Проєкти", navAssistant: "AI Асистент", navSettings: "Налаштування",
+        shortDashboard: "Дім", shortTasks: "Завд.", shortFitness: "Фіт", shortMoney: "Каса", shortProjects: "Буд.", shortAssistant: "AI", shortSettings: "Нал.",
+        commandYourDay: "Керуй своїм днем", systemStatus: "Статус системи", dashboardSubtitle: "Кокпіт для завдань, фітнесу, грошей, проєктів і темпу.",
+        streak: "Серія", day: "день", days: "днів", level: "Рівень", xp: "XP", welcomeBack: "З поверненням", morningGreeting: "Ранкова місія онлайн.", afternoonGreeting: "Денний режим сили.", nightGreeting: "Нічні операції активні.",
+        dashboardMotivation: "Обери один сильний фокус, збери кілька перемог і нехай XP покаже рух дня.", todaysFocus: "Фокус дня", focusPlaceholder: "Наприклад: зробити перший екран Drop Empire", lockFocus: "Зафіксувати",
+        playerProfile: "Профіль гравця", tasksDone: "Завдань виконано", balance: "Баланс", quickActions: "Швидкі дії", addTask: "Додати завдання", addTaskCopy: "Створити нове завдання", logFitness: "Записати фітнес", logFitnessCopy: "Відстежити тренування", moneyMove: "Рух грошей", moneyMoveCopy: "Додати дохід або витрату", askAi: "Запитати AI", askAiCopy: "Поради та ідеї",
+        missionQueue: "Черга місій", addMissionPlaceholder: "Додати місію...", rewardRules: "Правила нагород", completeTasksXp: "Виконуй завдання та отримуй XP", rewardCopy: "Кожне виконане завдання дає 20 XP. Серія зростає, коли сьогодні виконано хоча б одне завдання.", noTasks: "Місій поки немає. Додай одну й запусти XP.", worthXp: "Вартість", completed: "Виконано", completeTask: "Виконати завдання", deleteTask: "Видалити завдання",
+        bodyStats: "Показники тіла", weight: "Вага", steps: "Кроки", workoutNote: "Нотатка тренування", saveLog: "Зберегти", latestWeight: "Остання вага", latestSteps: "Останні кроки", workoutLogs: "Тренування", recentFitness: "Останні записи фітнесу", noFitness: "Записів фітнесу поки немає.", fitnessLog: "Запис фітнесу", deleteFitness: "Видалити запис фітнесу",
+        treasury: "Скарбниця", income: "Дохід", expense: "Витрата", amount: "Сума", note: "Нотатка", add: "Додати", savingGoal: "Ціль заощаджень", goalName: "Назва цілі", goalAmount: "Сума цілі", setGoal: "Задати ціль", noGoal: "Ціль ще не задана.", noMoney: "Транзакцій поки немає.", deleteMoney: "Видалити грошовий запис",
+        buildLab: "Лабораторія", newProjectName: "Назва нового проєкту", addProject: "Додати проєкт", entries: "записів", addProjectBegin: "Додай проєкт, щоб почати.", activeProject: "Активний проєкт", projectEntryPlaceholder: "Додати завдання, баг або ідею", addEntry: "Додати запис", task: "Завдання", bug: "Баг", idea: "Ідея", bugs: "Баги", ideas: "Ідеї", noProjectEntries: "Записів проєкту поки немає.", deleteProjectEntry: "Видалити запис проєкту",
+        aiCompanion: "AI Компаньйон", assistantHeading: "Асистент", assistantDemo: "Демо інтерфейсу. Відповіді поки симулюються.", chatPlaceholder: "Запитай про свою імперію...", send: "Надіслати",
+        settingsEyebrow: "Пульт керування", settingsIntro: "Налаштуй мову, профіль, акцент і поведінку додатка.", language: "Мова", chooseLanguage: "Обери мову", theme: "Тема", accentColor: "Колір акценту", themeCopy: "Темно-сіра тема залишається. Обери м'який акцент.", accentBlue: "Синьо-сірий", accentGreen: "Зелений", accentAmber: "Бурштиновий", accentRed: "Червоний", profile: "Профіль", nickname: "Нікнейм", nicknamePlaceholder: "Твій нікнейм", saveProfile: "Зберегти профіль", appPreferences: "Параметри додатка", interface: "Інтерфейс", compactMode: "Компактний режим", compactModeCopy: "Зменшити відступи в додатку.", animations: "Анімації", animationsCopy: "Використовувати спокійні ефекти.",
+        aiTaskReply: "Я б обрав найменше завдання з видимим результатом, виконав його, а потім узяв одну складнішу місію.", aiMoneyReply: "Скарбниця: запиши наступну витрату, захисти ціль заощаджень і знайди один простий грошовий крок на тиждень.", aiFitnessReply: "Фітнес-режим: кроки, вода й одна чітка нотатка тренування. Нехай це буде легко повторити завтра.", aiProjectReply: "Проєкт: визнач найближчий шматок для релізу, запиши один ризик і перетвори одну ідею на завдання.", aiDefaultReply: "Сигнал прийнято. Обери один пріоритет, дай йому чіткий фініш, і я допоможу оформити наступний крок.", aiOffline: "AI потребує підключення до інтернету.", updateAvailable: "Доступне оновлення", updateNow: "Оновити"
+      }
+    };
+
+    const defaultState = {
+      xp: 0,
+      focus: "",
+      lastTaskCompletionDate: "",
+      streak: 0,
+      tasks: [],
+      fitness: [],
+      money: [],
+      savingGoal: { name: "", amount: 0 },
+      settings: {
+        language: "en",
+        accent: "blue",
+        nickname: "",
+        compactMode: false,
+        animations: true
+      },
+      activeProjectId: "drop-empire",
+      projects: [
+        {
+          id: "drop-empire",
+          name: "Drop Empire",
+          entries: [
+            { id: cryptoId(), type: "idea", text: "Design product drop dashboard" },
+            { id: cryptoId(), type: "task", text: "Create first launch checklist" },
+            { id: cryptoId(), type: "bug", text: "Placeholder bug: fix mobile checkout spacing" }
+          ]
+        }
+      ],
+      messages: [
+        { role: "assistant", text: "Welcome to Life Empire. Tell me what you want to conquer today and I will help you shape the next move." }
+      ]
+    };
+
+    let state = loadState();
+
+    const moneyFormatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0
+    });
+
+    function cryptoId() {
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        return saved ? mergeDefaults(defaultState, saved) : structuredClone(defaultState);
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function mergeDefaults(base, saved) {
+      return {
+        ...structuredClone(base),
+        ...saved,
+        savingGoal: { ...base.savingGoal, ...(saved.savingGoal || {}) },
+        settings: { ...base.settings, ...(saved.settings || {}) },
+        projects: saved.projects?.length ? saved.projects : base.projects,
+        messages: saved.messages?.length ? saved.messages : base.messages
+      };
+    }
+
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    function tr(key) {
+      const language = state.settings?.language || "en";
+      return translations[language]?.[key] || translations.en[key] || key;
+    }
+
+    function setText(selector, value) {
+      const element = document.querySelector(selector);
+      if (element) element.textContent = value;
+    }
+
+    function setPlaceholder(selector, value) {
+      const element = document.querySelector(selector);
+      if (element) element.placeholder = value;
+    }
+
+    function setOptionText(selector, value) {
+      const element = document.querySelector(selector);
+      if (element) element.textContent = value;
+    }
+
+    function nicknameInitials() {
+      const name = state.settings.nickname.trim();
+      if (!name) return "LE";
+      return name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
+    }
+
+    function applyPreferences() {
+      document.body.classList.toggle("accent-green", state.settings.accent === "green");
+      document.body.classList.toggle("accent-amber", state.settings.accent === "amber");
+      document.body.classList.toggle("accent-red", state.settings.accent === "red");
+      document.body.classList.toggle("compact-mode", !!state.settings.compactMode);
+      document.body.classList.toggle("animations-off", !state.settings.animations);
+      document.documentElement.lang = state.settings.language || "en";
+    }
+
+    function renderStaticText() {
+      document.querySelector(".brand p").textContent = tr("commandYourDay");
+      setText(".sidebar-footer .eyebrow", tr("systemStatus"));
+      setText(".top-title .small", tr("dashboardSubtitle"));
+      setText(".hero-card .eyebrow", tr("welcomeBack"));
+      setText(".hero-card p:not(.eyebrow)", tr("dashboardMotivation"));
+      document.querySelector("label[for='focusInput']").textContent = tr("todaysFocus");
+      setPlaceholder("#focusInput", tr("focusPlaceholder"));
+      document.querySelector("#focusForm button").textContent = tr("lockFocus");
+      setText(".level-card .eyebrow", tr("playerProfile"));
+      document.querySelectorAll(".stats-row .small")[0].textContent = tr("streak");
+      document.querySelectorAll(".stats-row .small")[1].textContent = tr("tasksDone");
+      document.querySelectorAll(".stats-row .small")[2].textContent = tr("balance");
+      setText(".full .eyebrow", tr("quickActions"));
+      document.querySelectorAll(".action-title")[0].textContent = tr("addTask");
+      document.querySelectorAll(".action-copy")[0].textContent = tr("addTaskCopy");
+      document.querySelectorAll(".action-title")[1].textContent = tr("logFitness");
+      document.querySelectorAll(".action-copy")[1].textContent = tr("logFitnessCopy");
+      document.querySelectorAll(".action-title")[2].textContent = tr("moneyMove");
+      document.querySelectorAll(".action-copy")[2].textContent = tr("moneyMoveCopy");
+      document.querySelectorAll(".action-title")[3].textContent = tr("askAi");
+      document.querySelectorAll(".action-copy")[3].textContent = tr("askAiCopy");
+
+      setText("#tasks .eyebrow", tr("missionQueue"));
+      setText("#tasks-heading", tr("navTasks"));
+      setPlaceholder("#taskInput", tr("addMissionPlaceholder"));
+      document.querySelector("#taskForm button").textContent = tr("addTask");
+      setText("#tasks aside .eyebrow", tr("rewardRules"));
+      setText("#tasks aside h3", tr("completeTasksXp"));
+      setText("#tasks aside .small", tr("rewardCopy"));
+
+      setText("#fitness .eyebrow", tr("bodyStats"));
+      setText("#fitness-heading", tr("navFitness"));
+      setPlaceholder("#weightInput", tr("weight"));
+      setPlaceholder("#stepsInput", tr("steps"));
+      setPlaceholder("#workoutInput", tr("workoutNote"));
+      document.querySelector("#fitnessForm button").textContent = tr("saveLog");
+      document.querySelectorAll("#fitness .side .small")[0].textContent = tr("latestWeight");
+      document.querySelectorAll("#fitness .side .small")[1].textContent = tr("latestSteps");
+      document.querySelectorAll("#fitness .side .small")[2].textContent = tr("workoutLogs");
+      setText("#fitness .full:last-child h3", tr("recentFitness"));
+
+      setText("#money .eyebrow", tr("treasury"));
+      setText("#money-heading", tr("navMoney"));
+      setOptionText("#moneyType option[value='income']", tr("income"));
+      setOptionText("#moneyType option[value='expense']", tr("expense"));
+      setPlaceholder("#moneyAmount", tr("amount"));
+      setPlaceholder("#moneyNote", tr("note"));
+      document.querySelector("#moneyForm button").textContent = tr("add");
+      setText("#money aside .eyebrow", tr("savingGoal"));
+      setPlaceholder("#goalName", tr("goalName"));
+      setPlaceholder("#goalAmount", tr("goalAmount"));
+      document.querySelector("#goalForm button").textContent = tr("setGoal");
+
+      setText("#projects .eyebrow", tr("buildLab"));
+      setText("#projects-heading", tr("navProjects"));
+      setPlaceholder("#projectInput", tr("newProjectName"));
+      document.querySelector("#projectForm button").textContent = tr("addProject");
+
+      setText(".chat-header .eyebrow", tr("aiCompanion"));
+      setText("#assistant-heading", tr("assistantHeading"));
+      setText(".chat-header .small", tr("assistantDemo"));
+      setPlaceholder("#chatInput", tr("chatPlaceholder"));
+      document.querySelector("#chatForm button").textContent = tr("send");
+
+      setText("#settingsEyebrow", tr("settingsEyebrow"));
+      setText("#settings-heading", tr("navSettings"));
+      setText("#settingsIntro", tr("settingsIntro"));
+      setText("#languageLabel", tr("language"));
+      setText("#languageTitle", tr("chooseLanguage"));
+      setText("#themeLabel", tr("theme"));
+      setText("#themeTitle", tr("accentColor"));
+      setText("#themeCopy", tr("themeCopy"));
+      setText("[data-accent='blue']", tr("accentBlue"));
+      setText("[data-accent='green']", tr("accentGreen"));
+      setText("[data-accent='amber']", tr("accentAmber"));
+      setText("[data-accent='red']", tr("accentRed"));
+      setText("#profileLabel", tr("profile"));
+      setText("#profileTitle", tr("nickname"));
+      setPlaceholder("#nicknameInput", tr("nicknamePlaceholder"));
+      setText("#saveProfileButton", tr("saveProfile"));
+      setText("#preferencesLabel", tr("appPreferences"));
+      setText("#preferencesTitle", tr("interface"));
+      setText("#compactModeLabel", tr("compactMode"));
+      setText("#compactModeCopy", tr("compactModeCopy"));
+      setText("#animationsLabel", tr("animations"));
+      setText("#animationsCopy", tr("animationsCopy"));
+      setText("#updateToastText", tr("updateAvailable"));
+      setText("#updateButton", tr("updateNow"));
+      const mobileSettingsButton = document.querySelector(".mobile-settings-button");
+      mobileSettingsButton.textContent = tr("shortSettings");
+      mobileSettingsButton.setAttribute("aria-label", tr("navSettings"));
+    }
+
+    function todayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function renderNav() {
+      const desktopNav = document.querySelector("#desktopNav");
+      const mobileNav = document.querySelector("#mobileNav");
+      desktopNav.innerHTML = navItems.map(item => `
+        <button type="button" data-section="${item.id}" aria-label="${tr(item.labelKey)}">
+          <span class="nav-icon">${item.icon}</span>
+          <span>${tr(item.labelKey)}</span>
+        </button>
+      `).join("");
+      const mobileItems = navItems.filter(item => ["dashboard", "tasks", "fitness", "projects", "assistant"].includes(item.id));
+      mobileNav.innerHTML = mobileItems.map(item => `
+        <button type="button" data-section="${item.id}" aria-label="${tr(item.labelKey)}">
+          <span>${item.icon}</span>
+          <span>${tr(item.shortKey)}</span>
+        </button>
+      `).join("");
+    }
+
+    function setSection(id) {
+      document.querySelectorAll(".section").forEach(section => {
+        section.classList.toggle("active", section.id === id);
+      });
+      document.querySelectorAll("[data-section]").forEach(button => {
+        button.classList.toggle("active", button.dataset.section === id);
+      });
+      const item = navItems.find(nav => nav.id === id);
+      document.querySelector("#screenTitle").textContent = item ? tr(item.labelKey) : tr("navDashboard");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function levelInfo() {
+      const level = Math.floor(state.xp / xpPerLevel) + 1;
+      const currentXp = state.xp % xpPerLevel;
+      return { level, currentXp, percent: (currentXp / xpPerLevel) * 100 };
+    }
+
+    function balanceTotal() {
+      return state.money.reduce((sum, entry) => {
+        return sum + (entry.type === "income" ? entry.amount : -entry.amount);
+      }, 0);
+    }
+
+    function completeTask(task) {
+      if (task.done) return;
+      task.done = true;
+      task.completedAt = new Date().toISOString();
+      state.xp += taskXp;
+      updateStreak();
+      saveState();
+      renderAll();
+    }
+
+    function updateStreak() {
+      const today = todayKey();
+      if (state.lastTaskCompletionDate === today) return;
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayKey = yesterday.toISOString().slice(0, 10);
+
+      state.streak = state.lastTaskCompletionDate === yesterdayKey ? state.streak + 1 : 1;
+      state.lastTaskCompletionDate = today;
+    }
+
+    function renderDashboard() {
+      const now = new Date();
+      const hour = now.getHours();
+      const greeting = hour < 12 ? tr("morningGreeting") : hour < 18 ? tr("afternoonGreeting") : tr("nightGreeting");
+      const nickname = state.settings.nickname.trim();
+      const info = levelInfo();
+      const doneCount = state.tasks.filter(task => task.done).length;
+      const total = balanceTotal();
+
+      document.querySelector("#todayLabel").textContent = now.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
+      document.querySelector("#greeting").textContent = nickname ? `${greeting} ${nickname}` : greeting;
+      document.querySelector("#focusInput").value = state.focus;
+      document.querySelector("#levelLabel").textContent = `${tr("level")} ${info.level}`;
+      document.querySelector("#sidebarLevel").textContent = `${tr("level")} ${info.level}`;
+      document.querySelector("#xpBar").style.width = `${info.percent}%`;
+      document.querySelector("#sidebarXpBar").style.width = `${info.percent}%`;
+      document.querySelector("#xpText").textContent = `${info.currentXp} / ${xpPerLevel} ${tr("xp")}`;
+      document.querySelector("#sidebarXpText").textContent = `${info.currentXp} / ${xpPerLevel} ${tr("xp")}`;
+      document.querySelector("#streakCount").textContent = state.streak;
+      document.querySelector("#streakPill").textContent = `${tr("streak")}: ${state.streak} ${state.streak === 1 ? tr("day") : tr("days")}`;
+      document.querySelector("#tasksDoneCount").textContent = doneCount;
+      document.querySelector("#miniBalance").textContent = moneyFormatter.format(total);
+    }
+
+    function renderTasks() {
+      const list = document.querySelector("#taskList");
+      if (!state.tasks.length) {
+        list.innerHTML = `<p class="small">${tr("noTasks")}</p>`;
+        return;
+      }
+
+      list.innerHTML = state.tasks.map(task => `
+        <div class="item ${task.done ? "done" : ""}">
+          <button class="check" type="button" data-complete-task="${task.id}" aria-label="${tr("completeTask")}">${task.done ? "OK" : ""}</button>
+          <div>
+            <div class="item-title">${escapeHtml(task.text)}</div>
+            <div class="item-meta">${task.done ? tr("completed") : `${tr("worthXp")} ${taskXp} ${tr("xp")}`}</div>
+          </div>
+          <button class="icon-button" type="button" data-delete-task="${task.id}" aria-label="${tr("deleteTask")}">X</button>
+        </div>
+      `).join("");
+    }
+
+    function renderFitness() {
+      const latest = state.fitness[0];
+      document.querySelector("#latestWeight").textContent = latest?.weight ? `${latest.weight} kg` : "--";
+      document.querySelector("#latestSteps").textContent = latest?.steps ? Number(latest.steps).toLocaleString() : "0";
+      document.querySelector("#workoutCount").textContent = state.fitness.filter(entry => entry.note).length;
+      document.querySelector("#fitnessList").innerHTML = state.fitness.length ? state.fitness.map(entry => `
+        <div class="item">
+          <span class="nav-icon">F</span>
+          <div>
+            <div class="item-title">${entry.note ? escapeHtml(entry.note) : tr("fitnessLog")}</div>
+            <div class="item-meta">${entry.weight || "--"} kg - ${Number(entry.steps || 0).toLocaleString()} ${tr("steps").toLowerCase()} - ${entry.date}</div>
+          </div>
+          <button class="icon-button" type="button" data-delete-fitness="${entry.id}" aria-label="${tr("deleteFitness")}">X</button>
+        </div>
+      `).join("") : `<p class="small">${tr("noFitness")}</p>`;
+    }
+
+    function renderMoney() {
+      const total = balanceTotal();
+      const goalAmount = Number(state.savingGoal.amount) || 0;
+      const goalPercent = goalAmount > 0 ? Math.min(100, Math.max(0, (total / goalAmount) * 100)) : 0;
+
+      document.querySelector("#balance").textContent = moneyFormatter.format(total);
+      document.querySelector("#balance").className = `money-total ${total >= 0 ? "positive" : "negative"}`;
+      document.querySelector("#goalName").value = state.savingGoal.name;
+      document.querySelector("#goalAmount").value = state.savingGoal.amount || "";
+      document.querySelector("#goalBar").style.width = `${goalPercent}%`;
+      document.querySelector("#goalText").textContent = goalAmount
+        ? `${state.savingGoal.name || tr("savingGoal")}: ${moneyFormatter.format(Math.max(0, total))} / ${moneyFormatter.format(goalAmount)}`
+        : tr("noGoal");
+
+      document.querySelector("#moneyList").innerHTML = state.money.length ? state.money.map(entry => `
+        <div class="item">
+          <span class="nav-icon">${entry.type === "income" ? "+" : "-"}</span>
+          <div>
+            <div class="item-title ${entry.type === "income" ? "positive" : "negative"}">${moneyFormatter.format(entry.amount)}</div>
+            <div class="item-meta">${escapeHtml(entry.note || tr(entry.type))} - ${entry.date}</div>
+          </div>
+          <button class="icon-button" type="button" data-delete-money="${entry.id}" aria-label="${tr("deleteMoney")}">X</button>
+        </div>
+      `).join("") : `<p class="small">${tr("noMoney")}</p>`;
+    }
+
+    function renderProjects() {
+      const activeProject = state.projects.find(project => project.id === state.activeProjectId) || state.projects[0];
+      if (activeProject) state.activeProjectId = activeProject.id;
+
+      document.querySelector("#projectList").innerHTML = state.projects.map(project => `
+        <button class="project-tab ${project.id === state.activeProjectId ? "active" : ""}" type="button" data-project="${project.id}">
+          <strong>${escapeHtml(project.name)}</strong>
+          <div class="small">${project.entries.length} ${tr("entries")}</div>
+        </button>
+      `).join("");
+
+      if (!activeProject) {
+        document.querySelector("#projectDetail").innerHTML = `<p class="small">${tr("addProjectBegin")}</p>`;
+        return;
+      }
+
+      document.querySelector("#projectDetail").innerHTML = `
+        <p class="eyebrow">${tr("activeProject")}</p>
+        <h2>${escapeHtml(activeProject.name)}</h2>
+        <form class="form three" id="projectEntryForm">
+          <select id="projectEntryType" aria-label="Project entry type">
+            <option value="task">${tr("task")}</option>
+            <option value="bug">${tr("bug")}</option>
+            <option value="idea">${tr("idea")}</option>
+          </select>
+          <input id="projectEntryText" type="text" placeholder="${tr("projectEntryPlaceholder")}" autocomplete="off" />
+          <button class="primary-button" type="submit">${tr("addEntry")}</button>
+        </form>
+        <div class="tag-row">
+          <span class="tag">${tr("navTasks")} ${activeProject.entries.filter(entry => entry.type === "task").length}</span>
+          <span class="tag">${tr("bugs")} ${activeProject.entries.filter(entry => entry.type === "bug").length}</span>
+          <span class="tag">${tr("ideas")} ${activeProject.entries.filter(entry => entry.type === "idea").length}</span>
+        </div>
+        <div class="list">
+          ${activeProject.entries.length ? activeProject.entries.map(entry => `
+            <div class="item">
+              <span class="nav-icon">${entry.type.slice(0, 1).toUpperCase()}</span>
+              <div>
+                <div class="item-title">${escapeHtml(entry.text)}</div>
+                <div class="item-meta">${tr(entry.type)}</div>
+              </div>
+              <button class="icon-button" type="button" data-delete-project-entry="${entry.id}" aria-label="${tr("deleteProjectEntry")}">X</button>
+            </div>
+          `).join("") : `<p class="small">${tr("noProjectEntries")}</p>`}
+        </div>
+      `;
+
+      document.querySelector("#projectEntryForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const input = document.querySelector("#projectEntryText");
+        const type = document.querySelector("#projectEntryType").value;
+        if (!input.value.trim()) return;
+        activeProject.entries.unshift({ id: cryptoId(), type, text: input.value.trim() });
+        saveState();
+        renderProjects();
+      });
+    }
+
+    function renderMessages() {
+      const messages = document.querySelector("#messages");
+      messages.innerHTML = state.messages.map(message => `
+        <div class="bubble ${message.role}">${escapeHtml(message.text)}</div>
+      `).join("");
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function renderSettings() {
+      document.querySelector("#nicknameInput").value = state.settings.nickname;
+      document.querySelector("#avatarPreview").textContent = nicknameInitials();
+      document.querySelector("#compactToggle").checked = !!state.settings.compactMode;
+      document.querySelector("#animationsToggle").checked = !!state.settings.animations;
+      document.querySelectorAll("[data-language]").forEach(button => {
+        button.classList.toggle("active", button.dataset.language === state.settings.language);
+      });
+      document.querySelectorAll("[data-accent]").forEach(button => {
+        button.classList.toggle("active", button.dataset.accent === state.settings.accent);
+      });
+    }
+
+    function fakeAssistantReply(text) {
+      const lower = text.toLowerCase();
+      if (lower.includes("task")) return tr("aiTaskReply");
+      if (lower.includes("money")) return tr("aiMoneyReply");
+      if (lower.includes("fitness")) return tr("aiFitnessReply");
+      if (lower.includes("project") || lower.includes("drop")) return tr("aiProjectReply");
+      return tr("aiDefaultReply");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderAll() {
+      const activeId = document.querySelector(".section.active")?.id || "dashboard";
+      applyPreferences();
+      renderNav();
+      renderStaticText();
+      renderDashboard();
+      renderTasks();
+      renderFitness();
+      renderMoney();
+      renderProjects();
+      renderMessages();
+      renderSettings();
+      document.querySelectorAll("[data-section]").forEach(button => {
+        button.classList.toggle("active", button.dataset.section === activeId);
+      });
+      const activeItem = navItems.find(item => item.id === activeId);
+      document.querySelector("#screenTitle").textContent = activeItem ? tr(activeItem.labelKey) : tr("navDashboard");
+      saveState();
+    }
+
+    function bindEvents() {
+      document.addEventListener("click", event => {
+        const navButton = event.target.closest("[data-section]");
+        const quickButton = event.target.closest("[data-jump]");
+        const completeButton = event.target.closest("[data-complete-task]");
+        const deleteTaskButton = event.target.closest("[data-delete-task]");
+        const deleteFitnessButton = event.target.closest("[data-delete-fitness]");
+        const deleteMoneyButton = event.target.closest("[data-delete-money]");
+        const projectButton = event.target.closest("[data-project]");
+        const deleteProjectEntryButton = event.target.closest("[data-delete-project-entry]");
+        const languageButton = event.target.closest("[data-language]");
+        const accentButton = event.target.closest("[data-accent]");
+        const toggleRow = event.target.closest("[data-toggle-setting]");
+
+        if (navButton) setSection(navButton.dataset.section);
+        if (quickButton) setSection(quickButton.dataset.jump);
+        if (languageButton) {
+          state.settings.language = languageButton.dataset.language;
+          renderAll();
+        }
+        if (accentButton) {
+          state.settings.accent = accentButton.dataset.accent;
+          renderAll();
+        }
+        if (toggleRow && !event.target.matches("input")) {
+          event.preventDefault();
+          const setting = toggleRow.dataset.toggleSetting;
+          state.settings[setting] = !state.settings[setting];
+          renderAll();
+        }
+        if (completeButton) {
+          const task = state.tasks.find(item => item.id === completeButton.dataset.completeTask);
+          if (task) completeTask(task);
+        }
+        if (deleteTaskButton) {
+          state.tasks = state.tasks.filter(task => task.id !== deleteTaskButton.dataset.deleteTask);
+          renderAll();
+        }
+        if (deleteFitnessButton) {
+          state.fitness = state.fitness.filter(entry => entry.id !== deleteFitnessButton.dataset.deleteFitness);
+          renderAll();
+        }
+        if (deleteMoneyButton) {
+          state.money = state.money.filter(entry => entry.id !== deleteMoneyButton.dataset.deleteMoney);
+          renderAll();
+        }
+        if (projectButton) {
+          state.activeProjectId = projectButton.dataset.project;
+          renderProjects();
+          saveState();
+        }
+        if (deleteProjectEntryButton) {
+          const project = state.projects.find(item => item.id === state.activeProjectId);
+          project.entries = project.entries.filter(entry => entry.id !== deleteProjectEntryButton.dataset.deleteProjectEntry);
+          renderAll();
+        }
+      });
+
+      document.querySelector("#focusForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.focus = document.querySelector("#focusInput").value.trim();
+        saveState();
+      });
+
+      document.querySelector("#taskForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const input = document.querySelector("#taskInput");
+        if (!input.value.trim()) return;
+        state.tasks.unshift({ id: cryptoId(), text: input.value.trim(), done: false, createdAt: new Date().toISOString() });
+        input.value = "";
+        renderAll();
+      });
+
+      document.querySelector("#fitnessForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const weight = document.querySelector("#weightInput");
+        const steps = document.querySelector("#stepsInput");
+        const note = document.querySelector("#workoutInput");
+        if (!weight.value && !steps.value && !note.value.trim()) return;
+        state.fitness.unshift({
+          id: cryptoId(),
+          weight: weight.value,
+          steps: steps.value,
+          note: note.value.trim(),
+          date: new Date().toLocaleDateString()
+        });
+        weight.value = "";
+        steps.value = "";
+        note.value = "";
+        renderAll();
+      });
+
+      document.querySelector("#moneyForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const amount = Number(document.querySelector("#moneyAmount").value);
+        const note = document.querySelector("#moneyNote");
+        if (!amount || amount < 0) return;
+        state.money.unshift({
+          id: cryptoId(),
+          type: document.querySelector("#moneyType").value,
+          amount,
+          note: note.value.trim(),
+          date: new Date().toLocaleDateString()
+        });
+        document.querySelector("#moneyAmount").value = "";
+        note.value = "";
+        renderAll();
+      });
+
+      document.querySelector("#goalForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.savingGoal = {
+          name: document.querySelector("#goalName").value.trim(),
+          amount: Number(document.querySelector("#goalAmount").value) || 0
+        };
+        renderAll();
+      });
+
+      document.querySelector("#projectForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const input = document.querySelector("#projectInput");
+        if (!input.value.trim()) return;
+        const project = { id: cryptoId(), name: input.value.trim(), entries: [] };
+        state.projects.unshift(project);
+        state.activeProjectId = project.id;
+        input.value = "";
+        renderAll();
+      });
+
+      document.querySelector("#profileForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.settings.nickname = document.querySelector("#nicknameInput").value.trim();
+        renderAll();
+      });
+
+      document.querySelector("#nicknameInput").addEventListener("input", event => {
+        const temporaryName = event.target.value.trim();
+        document.querySelector("#avatarPreview").textContent = temporaryName
+          ? temporaryName.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase()
+          : "LE";
+      });
+
+      document.querySelector("#compactToggle").addEventListener("change", event => {
+        state.settings.compactMode = event.target.checked;
+        renderAll();
+      });
+
+      document.querySelector("#animationsToggle").addEventListener("change", event => {
+        state.settings.animations = event.target.checked;
+        renderAll();
+      });
+
+      document.querySelector("#chatForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const input = document.querySelector("#chatInput");
+        const text = input.value.trim();
+        if (!text) return;
+        state.messages.push({ role: "user", text });
+        input.value = "";
+        renderMessages();
+
+        setTimeout(() => {
+          // Real AI should be connected through a backend endpoint such as /api/ai.
+          // Never put an API key or direct model call in frontend JavaScript.
+          state.messages.push({ role: "assistant", text: navigator.onLine ? fakeAssistantReply(text) : tr("aiOffline") });
+          renderAll();
+        }, 420);
+      });
+    }
+
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+      let waitingWorker = null;
+      let refreshing = false;
+      const updateToast = document.querySelector("#updateToast");
+      const updateButton = document.querySelector("#updateButton");
+
+      const showUpdatePrompt = worker => {
+        waitingWorker = worker;
+        updateToast?.classList.add("show");
+      };
+
+      updateButton?.addEventListener("click", () => {
+        if (!waitingWorker) return;
+        waitingWorker.postMessage({ type: "SKIP_WAITING" });
+      });
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js", { scope: "./" })
+          .then(registration => {
+            if (registration.waiting && navigator.serviceWorker.controller) {
+              showUpdatePrompt(registration.waiting);
+            }
+
+            registration.addEventListener("updatefound", () => {
+              const newWorker = registration.installing;
+              if (!newWorker) return;
+
+              newWorker.addEventListener("statechange", () => {
+                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                  showUpdatePrompt(newWorker);
+                }
+              });
+            });
+          })
+          .catch(error => {
+            console.warn("Service worker registration failed", error);
+          });
+      });
+    }
+
+    applyPreferences();
+    renderNav();
+    bindEvents();
+    renderAll();
+    setSection("dashboard");
+    registerServiceWorker();
+  </script>
+</body>
+</html>
